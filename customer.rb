@@ -22,6 +22,12 @@ class Customer
     @id = customer['id'].to_i
   end
 
+  def delete()
+    sql = "DELETE FROM customers WHERE id = $1"
+    values = [@id]
+    SqlRunner.run(sql, values)
+  end
+
   def self.all()
     sql = "SELECT * FROM customers"
     values = []
@@ -59,4 +65,16 @@ class Customer
      films_data = SqlRunner.run(sql, values)
      return Film.map_items(films_data)
   end
+
+  def buys_ticket_to_see(film)
+
+    if @funds.to_i >= film.price
+      new_ticket = Ticket.new({ 'customer_id' => @id, 'film_id' => film.id})
+      new_ticket.save()
+      @funds -= film.price
+    else
+      puts 'Insufficient funds to buy this ticket!'
+    end
+  end
+
 end
