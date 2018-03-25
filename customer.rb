@@ -66,10 +66,10 @@ class Customer
      return Film.map_items(films_data)
   end
 
-  def buys_ticket_to_see(film)
+  def buys_ticket_to_see(film, screening)
 
     if @funds.to_i >= film.price
-      new_ticket = Ticket.new({ 'customer_id' => @id, 'film_id' => film.id})
+      new_ticket = Ticket.new({ 'customer_id' => @id, 'film_id' => film.id, 'screening_id' => screening.id})
       new_ticket.save()
       @funds -= film.price
     else
