@@ -68,13 +68,20 @@ class Customer
 
   def buys_ticket_to_see(film, screening)
 
-    if @funds.to_i >= film.price
-      new_ticket = Ticket.new({ 'customer_id' => @id, 'film_id' => film.id, 'screening_id' => screening.id})
-      new_ticket.save()
-      @funds -= film.price
+    if screening.tickets_available > 0
+      if @funds.to_i >= film.price
+        new_ticket = Ticket.new({ 'customer_id' => @id, 'film_id' => film.id, 'screening_id' => screening.id})
+        new_ticket.save()
+        screening.reduce_tickets_available()
+        screening.update()
+        @funds -= film.price
+      else
+        puts 'Insufficient funds to buy this ticket!'
+      end
     else
-      puts 'Insufficient funds to buy this ticket!'
+      puts 'Insufficient tickets available for this performance!'
     end
+
   end
 
 end

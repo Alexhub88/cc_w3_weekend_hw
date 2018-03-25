@@ -4,21 +4,22 @@ require_relative("./film")
 class Screening
 
   attr_reader :id
-  attr_accessor :time, :film_id
+  attr_accessor :time, :film_id, :tickets_available
 
   def initialize(new_screening)
     @id = new_screening['id'].to_i if new_screening['id']
     @time = new_screening['time']
     @film_id = new_screening['film_id'].to_i
+    @tickets_available = new_screening['tickets_available'].to_i
   end
 
   def save()
     sql = "INSERT INTO screenings
-    (time, film_id)
+    (time, film_id, tickets_available)
     VALUES
-    ($1, $2)
+    ($1, $2, $3)
     RETURNING id"
-    values = [@time, @film_id]
+    values = [@time, @film_id, @tickets_available]
     screening = SqlRunner.run(sql,values).first
     @id = screening['id'].to_i
   end
@@ -45,6 +46,20 @@ class Screening
   def self.map_items(screenings_hash)
     screenings = screenings_hash.map { |screening| Screening.new(screening) }
     return screenings
+  end
+
+  def reduce_tickets_available()
+    if @tickets_available > 0
+      @tickets_available -= 1
+    end
+  end
+
+  def update()
+    sql = "UPDATE screenings
+    SET (time, film_id, tickets_available) = ($1, $2, $3)
+    WHERE id = $4"
+    values = [@time, @film_id, @tickets_available, @id]
+    SqlRunner.run(sql, values)
   end
 
 end
